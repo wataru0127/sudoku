@@ -1,27 +1,80 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+  <div>
+    <h1>数独</h1>
+    <div class="sudoku">
+      <div v-for="row in sudoku" :key="row.key">
+        <div v-for="col in row.value" :key="col.key" :data-id="row.key + '-' + col.key"
+          @click="popup(row.key, col.key)">
+          <div>{{ col.value }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="btn">保存</div>
+    <div class="btn">計算</div>
+          <div v-if="isPopup" class="popup">
+            <div class="popup_inner">
+              <div v-for="n of number" :key="n" @click="addNumber(n)">
+                {{ n }}
+              </div>
+              <div class="reset" @click="resetNumber">リセット</div>
+            </div>
+          </div>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+
+interface sudokuColType {
+  key: number,
+  value: string
+}
+
+interface sudokuType {
+  key: number,
+  value: sudokuColType[]
+}
 
 export default defineComponent({
   name: 'App',
   components: {
-    HelloWorld
+  },
+  data() {
+    return {
+      number: 9,
+      sudoku: [] as sudokuType[],
+      isPopup: false,
+      target: {row:0, col:0}
+    }
+  },
+  methods: {
+    createTable(number: number) {
+      for (let index = 0; index < number; index++) {
+        this.sudoku.push({ key: index + 1, value: [] });
+        for (let index_sub = 0; index_sub < number; index_sub++) {
+          this.sudoku[index].value.push({ key: index_sub + 1, value: '' });
+        }
+      }
+    },
+    popup(key1: number, key2: number) {
+      this.isPopup = true;
+      this.target.row = key1 - 1;
+      this.target.col = key2 - 1;
+    },
+    addNumber(n:number) {
+      this.sudoku[this.target.row ].value[this.target.col].value = String(n);
+      this.isPopup = false;
+    },
+    resetNumber() {
+      this.sudoku[this.target.row ].value[this.target.col].value = '';
+      this.isPopup = false;
+    }
+  },
+  created() {
+    this.createTable(this.number);
   }
 });
 </script>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 </style>
