@@ -9,16 +9,18 @@
         </div>
       </div>
     </div>
-    <div class="btn">保存</div>
-    <div class="btn">計算</div>
-          <div v-if="isPopup" class="popup">
-            <div class="popup_inner">
-              <div v-for="n of number" :key="n" @click="addNumber(n)">
-                {{ n }}
-              </div>
-              <div class="reset" @click="resetNumber">リセット</div>
-            </div>
-          </div>
+    <div class="btn" @click="dataExport">出力</div>
+    <div class="btn" @click="btnImport">入力</div>
+    <div v-if="isPopup" class="popup">
+      <div class="popup_inner">
+        <div v-for="n of number" :key="n" @click="addNumber(n)">
+          {{ n }}
+        </div>
+        <div class="reset" @click="resetNumber">リセット</div>
+      </div>
+    </div>
+    <input type="file" style="display: none" @change="dataImport" ref="input" accept="application/json">
+
   </div>
 </template>
 
@@ -44,7 +46,7 @@ export default defineComponent({
       number: 9,
       sudoku: [] as sudokuType[],
       isPopup: false,
-      target: {row:0, col:0}
+      target: { row: 0, col: 0 }
     }
   },
   methods: {
@@ -61,14 +63,42 @@ export default defineComponent({
       this.target.row = key1 - 1;
       this.target.col = key2 - 1;
     },
-    addNumber(n:number) {
-      this.sudoku[this.target.row ].value[this.target.col].value = String(n);
+    addNumber(n: number) {
+      this.sudoku[this.target.row].value[this.target.col].value = String(n);
       this.isPopup = false;
     },
     resetNumber() {
-      this.sudoku[this.target.row ].value[this.target.col].value = '';
+      this.sudoku[this.target.row].value[this.target.col].value = '';
       this.isPopup = false;
-    }
+    },
+    dataExport() {
+      const blob = new Blob([JSON.stringify(this.sudoku, null, 2)], {
+        type: 'application/json',
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'exportData.json'; // 出力するファイルの名前
+      link.click();
+      link.remove();
+
+    },
+    dataImport() {
+      const ref: any = this.$refs.input;
+      const file = ref.files[0];
+      const reader = new FileReader()
+
+      reader.onload = () => {
+        const json = reader.result as string;
+        this.sudoku = JSON.parse(json);
+      }
+      reader.readAsText(file)
+
+    },
+    btnImport() {
+      const ref: any = this.$refs.input;
+      ref.click();
+    },
+
   },
   created() {
     this.createTable(this.number);
