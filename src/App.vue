@@ -10,6 +10,9 @@
       </div>
     </div>
     <div class="btn-set">
+      <div class="btn" @click="calculate">計算開始</div>
+    </div>
+    <div class="btn-set">
       <div class="btn" @click="dataReset">リセット</div>
       <div class="btn" @click="dataExport">エクスポート</div>
       <div class="btn" @click="btnImport">インポート</div>
@@ -29,6 +32,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import _ from 'lodash';
 
 interface sudokuColType {
   key: number,
@@ -40,14 +44,8 @@ interface sudokuType {
   value: sudokuColType[]
 }
 
-interface calcDataType2 {
-  [key: number]: number[]
-}
-interface calcDataType1 {
-  [key: number]: calcDataType2
-}
 interface calcDataType {
-  [key: number]: calcDataType1
+  [key: string]: number | number[]
 }
 
 export default defineComponent({
@@ -60,7 +58,7 @@ export default defineComponent({
       sudoku: [] as sudokuType[],
       isPopup: false,
       target: { row: 0, col: 0 },
-      calcData: {} as calcDataType
+      calcData: [] as calcDataType[]
     }
   },
   methods: {
@@ -74,34 +72,56 @@ export default defineComponent({
     },
     popup(key1: number, key2: number) {
       this.isPopup = true;
-      this.target.row = key1 - 1;
-      this.target.col = key2 - 1;
+      this.target.row = key1;
+      this.target.col = key2;
     },
     addNumber(n: number) {
-      this.sudoku[this.target.row].value[this.target.col].value = String(n);
+      this.sudoku[this.target.row - 1].value[this.target.col - 1].value = String(n);
       this.isPopup = false;
+      // 計算用データを変更する
+      let target = _.find(this.calcData, { 'row': this.target.row, 'col': this.target.col });
+      if(target) target.confirm = n;
+      const target_row = _.filter(this.calcData, {'row': this.target.row});
+      _.forEach(target_row, function(target){
+        if(Array.isArray(target.val)) target.val = _.difference(target.val, [n]);
+      });
+      const target_col = _.filter(this.calcData, {'col': this.target.col});
+      _.forEach(target_col, function(target){
+        if(Array.isArray(target.val)) target.val = _.difference(target.val, [n]);
+      });
+      const target_box = _.filter(this.calcData, {'box': this.boxNumber(this.target.row, this.target.col)});
+      _.forEach(target_box, function(target){
+        if(Array.isArray(target.val)) target.val = _.difference(target.val, [n]);
+      });
     },
     resetNumber() {
-      this.sudoku[this.target.row].value[this.target.col].value = '';
+      this.sudoku[this.target.row - 1].value[this.target.col - 1].value = '';
       this.isPopup = false;
     },
     boxNumber(row: number, col: number) {
       const base = Math.sqrt(this.number);
-      let box_n = 0;
-        box_n = Math.floor(col / base);
+      let box = 0;
+        box = Math.floor(col / base);
       if(col % base != 0){
-        box_n += 1;
+        box += 1;
       }
       if(row % base == 0){
-        box_n += (row / base - 1) * base
+        box += (row / base - 1) * base
       }
       else{
-        box_n += Math.floor(row / base) * base
+        box += Math.floor(row / base) * base
       }
-      if(!this.calcData[row]){this.calcData[row] = {}}
-      if(!this.calcData[row][col]){this.calcData[row][col] = {}}
-      if(!this.calcData[row][col][box_n]){this.calcData[row][col][box_n] = []}
-      return box_n;
+
+      if(this.calcData.length < this.number ** 2){
+        this.calcData.push({
+          row: row,
+          col: col,
+          box: box,
+          val: [1,2,3,4,5,6,7,8,9],
+          confirm: 0
+        });
+      }
+      return box;
     },
     dataReset() {
       console.log(this.sudoku);
@@ -134,6 +154,38 @@ export default defineComponent({
     btnImport() {
       const ref: any = this.$refs.input;
       ref.click();
+    },
+    async calculate() {
+      console.log(this.calcData);
+      // 横方向(row)
+      await this.calcRow();
+      // 縦方向(col)
+      await this.calcCol();
+      // ボックス(box)
+      await this.calcBox();
+    },
+    calcRow(){
+      console.log('row calulate');
+      for (let index = 0; index < this.number; index++) {
+        let row = index + 1;
+        let target = _.filter(this.calcData, function(o){
+          if(o.row == row && Array.isArray(o.val) && o.val.length == 1){
+            return true;
+          }
+          else{
+            return false;
+          }
+        });
+      }
+      
+    },
+    calcCol(){
+      console.log('col calulate');
+      
+    },
+    calcBox(){
+      console.log('box calulate');
+      
     },
 
   },
