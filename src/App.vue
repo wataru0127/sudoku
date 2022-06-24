@@ -1,16 +1,19 @@
 <template>
   <div>
-    <h1>数独</h1>
+    <h1>数独回答</h1>
     <div class="sudoku">
       <div v-for="row in sudoku" :key="row.key">
-        <div v-for="col in row.value" :key="col.key" :data-id="row.key + '-' + col.key"
+        <div v-for="col in row.value" :key="col.key" :data-row="row.key" :data-col="col.key" :data-box="boxNumber(row.key, col.key)"
           @click="popup(row.key, col.key)">
-          <div>{{ col.value }}</div>
+          {{ col.value }}
         </div>
       </div>
     </div>
-    <div class="btn" @click="dataExport">出力</div>
-    <div class="btn" @click="btnImport">入力</div>
+    <div class="btn-set">
+      <div class="btn" @click="dataReset">リセット</div>
+      <div class="btn" @click="dataExport">エクスポート</div>
+      <div class="btn" @click="btnImport">インポート</div>
+    </div>
     <div v-if="isPopup" class="popup">
       <div class="popup_inner">
         <div v-for="n of number" :key="n" @click="addNumber(n)">
@@ -37,6 +40,16 @@ interface sudokuType {
   value: sudokuColType[]
 }
 
+interface calcDataType2 {
+  [key: number]: number[]
+}
+interface calcDataType1 {
+  [key: number]: calcDataType2
+}
+interface calcDataType {
+  [key: number]: calcDataType1
+}
+
 export default defineComponent({
   name: 'App',
   components: {
@@ -46,7 +59,8 @@ export default defineComponent({
       number: 9,
       sudoku: [] as sudokuType[],
       isPopup: false,
-      target: { row: 0, col: 0 }
+      target: { row: 0, col: 0 },
+      calcData: {} as calcDataType
     }
   },
   methods: {
@@ -70,6 +84,29 @@ export default defineComponent({
     resetNumber() {
       this.sudoku[this.target.row].value[this.target.col].value = '';
       this.isPopup = false;
+    },
+    boxNumber(row: number, col: number) {
+      const base = Math.sqrt(this.number);
+      let box_n = 0;
+        box_n = Math.floor(col / base);
+      if(col % base != 0){
+        box_n += 1;
+      }
+      if(row % base == 0){
+        box_n += (row / base - 1) * base
+      }
+      else{
+        box_n += Math.floor(row / base) * base
+      }
+      if(!this.calcData[row]){this.calcData[row] = {}}
+      if(!this.calcData[row][col]){this.calcData[row][col] = {}}
+      if(!this.calcData[row][col][box_n]){this.calcData[row][col][box_n] = []}
+      return box_n;
+    },
+    dataReset() {
+      console.log(this.sudoku);
+      this.sudoku.map(x => x.value.map(y => y.value = ''));
+      // this.sudoku = [];
     },
     dataExport() {
       const blob = new Blob([JSON.stringify(this.sudoku, null, 2)], {
