@@ -113,15 +113,15 @@ export default defineComponent({
     },
     backVal(confirm:number){
       const target_row = _.filter(this.calcData, { 'row': this.target.row });
-      _.forEach(target_row, function (target) {
+      _.forEach(target_row, (target) => {
         if (Array.isArray(target.val)) target.val = _.sortBy(_.union(target.val, [Number(confirm)]));
       });
       const target_col = _.filter(this.calcData, { 'col': this.target.col });
-      _.forEach(target_col, function (target) {
+      _.forEach(target_col, (target) => {
         if (Array.isArray(target.val)) target.val = _.sortBy(_.union(target.val, [Number(confirm)]));
       });
       const target_box = _.filter(this.calcData, { 'box': this.boxNumber(this.target.row, this.target.col) });
-      _.forEach(target_box, function (target) {
+      _.forEach(target_box, (target) => {
         if (Array.isArray(target.val)) target.val = _.sortBy(_.union(target.val, [Number(confirm)]));
       });
 
@@ -189,7 +189,7 @@ export default defineComponent({
     },
     calculate() {
       // console.log(this.calcData);
-      let target = _.filter(this.calcData, function (o) {
+      let target = _.filter(this.calcData, (o) => {
         if (!o.confirm && Array.isArray(o.val) && o.val.length == 1) {
           return true;
         }
@@ -208,16 +208,16 @@ export default defineComponent({
       for (let index = 0; index < this.number; index++) {
         let num = index + 1;
 
-        const target_row = _.filter(this.calcData, function (l) {
+        const target_row = _.filter(this.calcData, (l) => {
           return l.row == num && !l.confirm;
         });
         const only_row_val: number[][] = [];
-        _.forEach(target_row, function (l) {
-          const target_row_val = _.filter(target_row, function (o) {
+        _.forEach(target_row, (l) => {
+          const target_row_val = _.filter(target_row, (o) => {
             return _.isEqual(o.val, l.val);
           });
           if (Array.isArray(l.val) && l.val.length == target_row_val.length) {
-            const target_row_val_not = _.filter(target_row, function (o) {
+            const target_row_val_not = _.filter(target_row, (o) => {
               return !_.isEqual(o.val, l.val)
             });
             _.forEach(target_row_val_not, (p) => {
@@ -230,16 +230,16 @@ export default defineComponent({
         });
         this.onlyValue(only_row_val, num, 'row');
 
-        const target_col = _.filter(this.calcData, function (l) {
+        const target_col = _.filter(this.calcData, (l) => {
           return l.col == num && !l.confirm;
         });
         const only_col_val: number[][] = [];
-        _.forEach(target_col, function (l) {
-          const target_col_val = _.filter(target_col, function (o) {
+        _.forEach(target_col, (l) => {
+          const target_col_val = _.filter(target_col, (o) => {
             return _.isEqual(o.val, l.val);
           });
           if (Array.isArray(l.val) && l.val.length == target_col_val.length) {
-            const target_col_val_not = _.filter(target_col, function (o) {
+            const target_col_val_not = _.filter(target_col, (o) => {
               return !_.isEqual(o.val, l.val)
             });
             _.forEach(target_col_val_not, (p) => {
@@ -252,16 +252,16 @@ export default defineComponent({
         });
         this.onlyValue(only_col_val, num, 'col');
 
-        const target_box = _.filter(this.calcData, function (l) {
+        const target_box = _.filter(this.calcData, (l) => {
           return l.box == num && !l.confirm;
         });
         const only_box_val: number[][] = [];
-        _.forEach(target_box, function (l) {
-          const target_box_val = _.filter(target_box, function (o) {
+        _.forEach(target_box, (l) => {
+          const target_box_val = _.filter(target_box, (o) => {
             return _.isEqual(o.val, l.val);
           });
           if (Array.isArray(l.val) && l.val.length == target_box_val.length) {
-            const target_box_val_not = _.filter(target_box, function (o) {
+            const target_box_val_not = _.filter(target_box, (o) => {
               return !_.isEqual(o.val, l.val)
             });
             _.forEach(target_box_val_not, (p) => {
@@ -283,32 +283,32 @@ export default defineComponent({
     },
     checkData(row: number, col: number, confirm: number) {
       const target_row = _.filter(this.calcData, { 'row': row });
-      _.forEach(target_row, function (target) {
+      _.forEach(target_row, (target) => {
         if (Array.isArray(target.val)) target.val = _.difference(target.val, [confirm]);
       });
       const target_col = _.filter(this.calcData, { 'col': col });
-      _.forEach(target_col, function (target) {
+      _.forEach(target_col, (target) => {
         if (Array.isArray(target.val)) target.val = _.difference(target.val, [confirm]);
       });
       const target_box = _.filter(this.calcData, { 'box': this.boxNumber(row, col) });
-      _.forEach(target_box, function (target) {
+      _.forEach(target_box, (target) => {
         if (Array.isArray(target.val)) target.val = _.difference(target.val, [confirm]);
       });
     },
     onlyValue(array: number[][], num: number, key: string) {
-      let row_only = _.filter(_.flattenDeep(array), function (val, idx, arr) {
+      let row_only = _.filter(_.flattenDeep(array), (val, idx, arr) => {
         return _.indexOf(arr, val) === _.lastIndexOf(arr, val);
       });
-      const target_row_valonly = _.filter(this.calcData, function (l) {
+      const target_row_valonly = _.filter(this.calcData, (l) => {
         return !l.confirm && l[key] == num && Array.isArray(l.val)
           // 重複している
-          && _.filter(_.flattenDeep([row_only, l.val]), function (val, idx, arr) { return _.indexOf(arr, val) === idx && _.lastIndexOf(arr, val) !== idx; }).length > 0;
+          && _.filter(_.flattenDeep([row_only, l.val]), (val, idx, arr) => { return _.indexOf(arr, val) === idx && _.lastIndexOf(arr, val) !== idx; }).length > 0;
       });
       _.forEach(target_row_valonly, (p) => {
         let val;
         if (Array.isArray(p.val)) {
           // 重複している要素
-          val = _.filter(_.flattenDeep([row_only, p.val]), function (val, idx, arr) { return _.indexOf(arr, val) === idx && _.lastIndexOf(arr, val) !== idx; });
+          val = _.filter(_.flattenDeep([row_only, p.val]), (val, idx, arr) => { return _.indexOf(arr, val) === idx && _.lastIndexOf(arr, val) !== idx; });
         }
         if (Array.isArray(val) && val.length == 1) {
           p.confirm = val[0];
