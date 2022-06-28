@@ -1,5 +1,8 @@
 # sudoku
 
+## Demo
+https://sudoku-50fd5.web.app/
+
 ## Project setup
 ```
 npm install
