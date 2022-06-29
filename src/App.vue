@@ -18,7 +18,7 @@
       <div class="btn" @click="dataExport">エクスポート</div>
       <div class="btn" @click="btnImport">インポート</div>
     </div>
-    <div v-if="isPopup" class="popup">
+    <div v-if="isPopup" class="popup" @click.self="closePopup">
       <div class="popup_inner">
         <div v-for="n of number" :key="n" @click="addNumber(n)">
           {{ n }}
@@ -88,6 +88,9 @@ export default defineComponent({
       this.isPopup = true;
       if (key1) this.target.row = key1;
       if (key2) this.target.col = key2;
+    },
+    closePopup() {
+      this.isPopup = false;
     },
     addNumber(n: number) {
       this.isPopup = false;
